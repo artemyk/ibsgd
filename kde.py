@@ -43,7 +43,7 @@ def kde_entropy_from_dists_loo(dists, x, var):
     h = -K.mean(lprobs)
     return h
 
-def entropy_estimator(x, var):
+def entropy_estimator_kl(x, var):
     dims, N = get_shape(x)
     dists = Kget_dists(x)
     dists2 = dists / (2*var)
@@ -51,3 +51,16 @@ def entropy_estimator(x, var):
     lprobs = K.logsumexp(-dists2, axis=1) - K.log(N) - normconst
     h = -K.mean(lprobs)
     return dims/2 + h
+
+def entropy_estimator_bd(x, var):
+    dims, N = get_shape(x)
+    val = entropy_estimator_kl(x,4*var)
+    return val + np.log(0.25)*dims/2
+
+def kde_condentropy(output, var):
+    # Return entropy of a multivariate Gaussian, in nats
+
+    dims = output.shape[1]
+    normconst = (dims/2.0)*(np.log(2*np.pi*var) + 1)
+    return normconst
+
