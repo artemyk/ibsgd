@@ -21,6 +21,7 @@ def bin_calc_information(inputdata, layerdata, num_of_bins):
     return H_LAYER - H_LAYER_GIVEN_INPUT
 
 def bin_calc_information2(labelixs, layerdata, binsize):
+    # This is even further simplified, where we use np.floor instead of digitize
     def get_h(d):
         digitized = np.floor(d / binsize).astype('int')
         p_ts, _ = get_unique_probs( digitized )
