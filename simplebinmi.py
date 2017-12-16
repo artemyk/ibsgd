@@ -29,7 +29,7 @@ def bin_calc_information2(labelixs, layerdata, binsize):
 
     H_LAYER = get_h(layerdata)
     H_LAYER_GIVEN_OUTPUT = 0
-    for ixs in labelixs:
+    for label, ixs in labelixs.items():
         H_LAYER_GIVEN_OUTPUT += ixs.mean() * get_h(layerdata[ixs,:])
     return H_LAYER, H_LAYER - H_LAYER_GIVEN_OUTPUT
     # H_LAYER_GIVEN_INPUT = 0.
