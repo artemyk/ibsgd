@@ -18,3 +18,16 @@ H_Y_lower = entropy_func_lower([data,])[0]
 print("Upper bound: %0.3f nats" % (H_Y_upper - H_Y_given_X))
 print("Lower bound: %0.3f nats" % (H_Y_lower - H_Y_given_X))
 
+# Alternative calculation, direct from distance matrices
+dims, N = kde.get_shape(K.variable(data))
+dists = kde.Kget_dists(K.variable(data))
+dists2 = dists / (2*noise_variance)
+mi2 = K.eval(-K.mean(K.logsumexp(-dists2, axis=1) - K.log(N)))
+print("Upper bound2: %0.3f nats" % mi2)
+
+
+dims, N = kde.get_shape(K.variable(data))
+dists = kde.Kget_dists(K.variable(data))
+dists2 = dists / (2*4*noise_variance)
+mi2 = K.eval(-K.mean(K.logsumexp(-dists2, axis=1) - K.log(N)) )
+print("Lower bound2: %0.3f nats" % mi2)
