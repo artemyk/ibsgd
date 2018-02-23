@@ -6,6 +6,7 @@ import numpy as np
 import cPickle
 import os
 
+import utils
 
 class LoggingReporter(keras.callbacks.Callback):
     def __init__(self, cfg, trn, tst, do_save_func=None, *kargs, **kwargs):
@@ -13,6 +14,8 @@ class LoggingReporter(keras.callbacks.Callback):
         self.cfg = cfg # Configuration options dictionary
         self.trn = trn  # Train data
         self.tst = tst  # Test data
+        if self.cfg['FULL_MI']:
+            self.full = utils.construct_full_dataset(trn,tst)
         
         # do_save_func(epoch) should return True if we should save on that epoch
         self.do_save_func = do_save_func
@@ -116,7 +119,10 @@ class LoggingReporter(keras.callbacks.Callback):
             data['gradmean'    ].append( np.linalg.norm(stackedgrads.mean(axis=1)) )
             data['gradstd'     ].append( np.linalg.norm(stackedgrads.std(axis=1)) )
             
-            data['activity_tst'].append(self.layerfuncs[lndx]([self.tst.X,])[0])
+            if self.cfg['FULL_MI']:
+                data['activity_tst'].append(self.layerfuncs[lndx]([self.full.X,])[0])
+            else:
+                data['activity_tst'].append(self.layerfuncs[lndx]([self.tst.X,])[0])
             
         fname = self.cfg['SAVE_DIR'] + "/epoch%08d"% epoch
         print("Saving", fname)
