@@ -1,0 +1,7 @@
+numpy
+scipy
+matplotlib
+keras
+pathlib2
+tensorflow
+seaborn
