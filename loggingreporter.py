@@ -14,6 +14,10 @@ class LoggingReporter(keras.callbacks.Callback):
         self.cfg = cfg # Configuration options dictionary
         self.trn = trn  # Train data
         self.tst = tst  # Test data
+        
+        if 'FULL_MI' not in cfg:
+            self.cfg['FULL_MI'] = False # Whether to compute MI on train and test data, or just test
+            
         if self.cfg['FULL_MI']:
             self.full = utils.construct_full_dataset(trn,tst)
         
