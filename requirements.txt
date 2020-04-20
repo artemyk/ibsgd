@@ -5,3 +5,4 @@ keras
 pathlib2
 tensorflow
 seaborn
+six

@@ -1,5 +1,9 @@
 # Code for On the Information Bottleneck Theory of Deep Learning
 
+Recently updated for Python 3, `tensorflow` 2.1.0, `keras` 2.3.1.
+
+Other requirements: `six`, `pathlib2`, `seaborn`.
+
 * `MNIST_SaveActivations.ipynb` is a jupyter notebook that trains on MNIST and saves (in a data directory) activations when run on test set inputs (as well as weight norms, &c.) for each epoch.
 
 * `MNIST_ComputeMI.ipynb` is a jupyter notebook that loads the data files, computes MI values, and does the infoplane plots and SNR plots for data created using `MNIST_SaveActivations.ipynb`.

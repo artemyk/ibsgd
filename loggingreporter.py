@@ -3,7 +3,7 @@ import keras
 import keras.backend as K
 import numpy as np
 
-import cPickle
+from six.moves import cPickle
 import os
 
 import utils
@@ -44,17 +44,17 @@ class LoggingReporter(keras.callbacks.Callback):
                 self.layerfuncs.append(K.function(self.model.inputs, [l.output,]))
                 self.layerweights.append(l.kernel)
             
-        input_tensors = [self.model.inputs[0],
-                         self.model.sample_weights[0],
-                         self.model.targets[0],
-                         K.learning_phase()]
+        inputs = [self.model._feed_inputs, 
+                  self.model._feed_targets,
+                  self.model._feed_sample_weights,
+                  K.learning_phase()] 
+        
         # Get gradients of all the relevant layers at once
         grads = self.model.optimizer.get_gradients(self.model.total_loss, self.layerweights)
-        self.get_gradients = K.function(inputs=input_tensors,
-                                        outputs=grads)
+        self.get_gradients = K.function(inputs=inputs, outputs=grads)
         
         # Get cross-entropy loss
-        self.get_loss = K.function(inputs=input_tensors, outputs=[self.model.total_loss,])
+        self.get_loss = K.function(inputs=inputs, outputs=[self.model.total_loss,])
             
     def on_epoch_begin(self, epoch, logs={}):
         if self.do_save_func is not None and not self.do_save_func(epoch):
@@ -86,14 +86,13 @@ class LoggingReporter(keras.callbacks.Callback):
         self._batch_todo_ixs = self._batch_todo_ixs[batchsize:]
         
         # Get gradients for this batch
-        inputs = [self.trn.X[cur_ixs,:],  # Inputs
-                  [1,]*len(cur_ixs),      # Uniform sample weights
-                  self.trn.Y[cur_ixs,:],  # Outputs
-                  1                       # Training phase
-                 ]
+        
+        x, y, weights = self.model._standardize_user_data(self.trn.X[cur_ixs,:], self.trn.Y[cur_ixs,:])        
+        inputs = [x, y, weights, 1] # 1 indicates training phase
+        
         for lndx, g in enumerate(self.get_gradients(inputs)):
             # g is gradients for weights of lndx's layer
-            oneDgrad = np.reshape(g, -1, 1)                  # Flatten to one dimensional vector
+            oneDgrad = np.reshape(g, [-1, 1])                  # Flatten to one dimensional vector
             self._batch_gradients[lndx].append(oneDgrad)
 
 
@@ -105,7 +104,8 @@ class LoggingReporter(keras.callbacks.Callback):
         # Get overall performance
         loss = {}
         for cdata, cdataname, istrain in ((self.trn,'trn',1), (self.tst, 'tst',0)):
-            loss[cdataname] = self.get_loss([cdata.X, [1,]*len(cdata.X), cdata.Y, istrain])[0].flat[0]
+            x, y, weights = self.model._standardize_user_data(cdata.X, cdata.Y)        
+            loss[cdataname] = self.get_loss([x, y, weights, istrain])[0].flat[0]
             
         data = {
             'weights_norm' : [],   # L2 norm of weights

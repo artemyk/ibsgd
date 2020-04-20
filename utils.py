@@ -56,7 +56,7 @@ def get_IB_data(ID):
 
 def create_IB_data(idx):
     data_sets_org = load_data()
-    data_sets = data_shuffle(data_sets_org, [80], shuffle_data=True)
+    data_sets = data_shuffle(data_sets_org, 80, shuffle_data=True)
     X_train, y_train, X_test, y_test = data_sets.train.data, data_sets.train.labels[:,0], data_sets.test.data, data_sets.test.labels[:,0]
     np.savez_compressed('datasets/IB_data_'+str(idx), X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test)
 
@@ -94,8 +94,9 @@ def data_shuffle(data_sets_org, percent_of_train, min_test_data=80, shuffle_data
     perc = lambda i, t: np.rint((i * t) / 100).astype(np.int32)
     C = type('type_C', (object,), {})
     data_sets = C()
-    stop_train_index = perc(percent_of_train[0], data_sets_org.data.shape[0])
+    stop_train_index = perc(percent_of_train, data_sets_org.data.shape[0])
     start_test_index = stop_train_index
+    
     if percent_of_train > min_test_data:
         start_test_index = perc(min_test_data, data_sets_org.data.shape[0])
     data_sets.train = C()
